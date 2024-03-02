@@ -9,19 +9,35 @@ def homepage():
 
 @app.route("/RandomNumberGenerator", methods=["GET", "POST"])
 def RnGen():
-    if request.method == "POST":
-        number = int(request.form.get("number"))
-        result = randomize(number)
-        number - 1
-        return result
-        # return render_template("RandomNumberGenerator.html")
+    global l 
+    l = []
+    if request.method == "POST" and request.form.get("number") != "":
+        num = int(request.form.get("number"))
+        for i in range(1, num+1):
+            l.append(i)
+        return redirect("/RNGResult", 302)
     return render_template("RandomNumberGenerator.html")
 
-def randomize(number):
-    result = random.randrange(1, number)
-    return str(result)
-
-
+@app.route("/RNGResult", methods=["GET", "POST"])
+def RNGResult():
+    if request.method == "POST" and request.form["generate"] == "Generate Number" and len(l) > 1:
+        random.shuffle(l)
+        result = l[0]
+        l.sort()
+        l.remove(result)
+        out = l[-1]
+        return render_template("RNGResult.html", out = str(out), result=str(result))
+    elif request.method == "POST" and request.form["generate"] == "Generate Number" and len(l) == 1 :
+        return redirect("/RandomNumberGenerator", 302)
+    elif request.method == "POST" and request.form["generate"] == "Reset":
+        return redirect("/RandomNumberGenerator", 302)
+    else:
+        random.shuffle(l)
+        result = l[0]
+        l.sort()
+        l.remove(result)
+        out = l[-1]
+        return render_template("RNGResult.html", out = str(out), result=str(result))
 
 
 if __name__ == '__main__':
